@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Passions Form</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Passions Form</h1>
+      <h2 id="passionate"></h2>
+      <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+      <br>
+      <label for="firstname" class="col-lg-2 control-label">First Name</label>
+      <input id="firstname" type="text">
+      <label for="passionsnumber" class="col-lg-2 control-label">Passions Number</label>
+      <input id="passionsnumber" type="number">
+      <button id="button">Update</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script>
+      if (typeof web3 !== 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+      } else {
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+      var passionateContractABI = web3.eth.contract([
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "passionsNumber",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getPassionate",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "firstName",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_firstName",
+				"type": "string"
+			},
+			{
+				"name": "_passionsNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "setPassionate",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "firstname",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "passionsnumber",
+				"type": "uint256"
+			}
+		],
+		"name": "PassionateChange",
+		"type": "event"
+	}
+]);
+      var passionateContract = passionateContractABI.at("0xc4a1697134bc9ce5b35ec915fd19da2b88fa7b66");
+      console.log(passionateContract);
+
+      var passionateEvent = passionateContract.PassionateChange();
+
+      passionateEvent.watch(function(error, result) {
+        if (!error) {
+          $("#loader").hide();
+          $("#passionate").html(result.args.firstname + ' (' + result.args.passionsnumber + ' passions)');
+        } else {
+          $("#loader").hide();
+          console.log(error);
+        }
+      });
+
+      $("#button").click(function() {
+        passionateContract.setPassionate($("#firstname").val(), $("#passionsnumber").val(), (err, res) => {
+          if (err) {
+            $("#loader").hide();
+            console.log('oh no');
+          }
+        });
+          $("#loader").show();
+      });
+    </script>
+  </body>
+</html>
